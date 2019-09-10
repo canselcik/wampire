@@ -6,10 +6,14 @@ use std::sync::{Arc, Mutex};
 use wampire::client::{Client, Connection, Subscription};
 use wampire::{MatchingPolicy, Value, URI};
 use std::env::args;
+use serde::Serialize;
+use serde_json::Serializer;
 
 #[macro_use]
 extern crate log;
 extern crate env_logger;
+extern crate serde;
+extern crate serde_json;
 
 
 fn subscribe(
@@ -19,20 +23,26 @@ fn subscribe(
     policy: MatchingPolicy,
 ) {
     let subscriptions = Arc::clone(subscriptions);
-    client
-        .subscribe_with_pattern(
+    client.subscribe_with_pattern(
             URI::new(&topic),
             Box::new(move |args, kwargs| {
-                println!(
-                    "Received message on topic {} with args {:?} and kwargs {:?}",
-                    topic, args, kwargs
-                );
+//                println!(
+//                    "{} => ( {:?} )-( {:?} )",
+//                    topic, args, kwargs
+//                );
+
+                let val = args.get(0).unwrap();
+                let snapshot = match val {
+                    Value::String(ref s) => s.clone(),
+                    _ => String::new()
+                };
+                println!("{}", snapshot);
             }),
             policy,
         )
         .unwrap()
         .and_then(move |subscription| {
-            println!("Subscribed to topic {}", subscription.topic.uri);
+            info!("Subscribed to topic {}", subscription.topic.uri);
             subscriptions.lock().unwrap().push(subscription);
             Ok(())
         })
@@ -40,44 +50,9 @@ fn subscribe(
         .unwrap();
 }
 
-fn unsubscribe(
-    client: &mut Client,
-    subscriptions: &mut Arc<Mutex<Vec<Subscription>>>,
-    args: &[String],
-) {
-    if args.len() > 1 {
-        println!("Too many arguments to subscribe.  Ignoring");
-    } else if args.is_empty() {
-        println!("Please specify the topic to subscribe to");
-        return;
-    }
-    match args[0].parse::<usize>() {
-        Ok(i) => {
-            let mut subscriptions = subscriptions.lock().unwrap();
-            if i >= subscriptions.len() {
-                println!("Invalid subscription index: {}", i);
-                return;
-            }
-            let subscription = subscriptions.remove(i);
-            let topic = subscription.topic.uri.clone();
-            client.unsubscribe(subscription)
-                .unwrap()
-                .and_then(move |()| {
-                    println!("Successfully unsubscribed from {}", topic);
-                    Ok(())
-                })
-                .await()
-                .unwrap();
-        }
-        Err(_) => {
-            println!("Invalid subscription index: {}", args[0]);
-        }
-    }
-}
-
 fn main() {
     let args: Vec<String> = env::args().collect();
-    println!("{:?}", args);
+    info!("{:?}", args);
     let mut url: String = "ws://127.0.0.1:9000/ws".to_string();
     if args.len() > 1 {
         url = args[1].to_string();
