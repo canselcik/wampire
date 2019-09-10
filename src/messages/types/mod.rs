@@ -28,6 +28,7 @@ pub enum MatchingPolicy {
     Wildcard,
     /// The given pattern only matches URIs that are identical.
     Strict,
+    Mqtt,
 }
 
 /// The policies that dictate how invocations are distributed amongst shared registrations
@@ -92,6 +93,7 @@ impl serde::Serialize for MatchingPolicy {
         let ser_str = match *self {
             MatchingPolicy::Prefix => "prefix",
             MatchingPolicy::Wildcard => "wildcard",
+            MatchingPolicy::Mqtt => "mqtt",
             MatchingPolicy::Strict => "",
         };
         serializer.serialize_str(ser_str)
