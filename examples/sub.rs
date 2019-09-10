@@ -95,6 +95,5 @@ fn main() {
 
     let mut subscriptions = Arc::new(Mutex::new(Vec::new()));
     subscribe(&mut client, &mut subscriptions, "#".to_string(), MatchingPolicy::Mqtt);
-
     loop {}
 }
