@@ -1,19 +1,21 @@
+extern crate env_logger;
 extern crate eventual;
+#[macro_use]
+extern crate log;
+extern crate serde;
+extern crate serde_json;
 extern crate wampire;
-use eventual::Async;
-use std::{io, env};
-use std::sync::{Arc, Mutex};
-use wampire::client::{Client, Connection, Subscription};
-use wampire::{MatchingPolicy, Value, URI};
+
+use std::{env, io};
 use std::env::args;
+use std::sync::{Arc, Mutex};
+
+use eventual::Async;
 use serde::Serialize;
 use serde_json::Serializer;
 
-#[macro_use]
-extern crate log;
-extern crate env_logger;
-extern crate serde;
-extern crate serde_json;
+use wampire::{MatchingPolicy, URI, Value};
+use wampire::client::{Client, Connection, Subscription};
 
 
 fn subscribe(
