@@ -21,6 +21,7 @@ use std::time::Duration;
 use url::Url;
 use utils::StructMapWriter;
 use {CallError, CallResult, Error, ErrorKind, WampResult, ID};
+use std::borrow::Borrow;
 
 const CONNECTION_TIMEOUT: Token = Token(124);
 
@@ -955,8 +956,7 @@ impl Client {
 
     pub fn is_connected(&self) -> bool {
         let info = self.connection_info.lock().unwrap();
-        let state = info.connection_state.clone();
-        match state {
+        match info.connection_state {
             ConnectionState::Connected => true,
             ConnectionState::Connecting => true,
             ConnectionState::Disconnected => false,
