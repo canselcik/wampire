@@ -952,6 +952,17 @@ impl Client {
             )))
         }
     }
+
+    pub fn isConnected(&self) -> bool {
+        let info = self.connection_info.lock().unwrap();
+        let state = info.connection_state.clone();
+        match state {
+            ConnectionState::Connected => true,
+            ConnectionState::Connecting => true,
+            ConnectionState::Disconnected => false,
+            ConnectionState::ShuttingDown => false,
+        }
+    }
 }
 
 impl fmt::Debug for ConnectionHandler {
