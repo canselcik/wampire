@@ -960,7 +960,7 @@ impl Client {
             ConnectionState::Connected => true,
             ConnectionState::Connecting => true,
             ConnectionState::Disconnected => false,
-            ConnectionState::ShuttingDown => false,
+            ConnectionState::ShuttingDown => true,
         }
     }
 }
