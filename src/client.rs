@@ -953,7 +953,7 @@ impl Client {
         }
     }
 
-    pub fn isConnected(&self) -> bool {
+    pub fn is_connected(&self) -> bool {
         let info = self.connection_info.lock().unwrap();
         let state = info.connection_state.clone();
         match state {
