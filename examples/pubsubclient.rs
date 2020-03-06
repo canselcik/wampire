@@ -1,15 +1,12 @@
-extern crate eventual;
-extern crate wampire;
-use eventual::Async;
-use std::{io, env};
+use std::io;
 use std::sync::{Arc, Mutex};
+
+use env_logger;
+use eventual::Async;
+use log::info;
+
 use wampire::client::{Client, Connection, Subscription};
 use wampire::{MatchingPolicy, Value, URI};
-use std::env::args;
-
-#[macro_use]
-extern crate log;
-extern crate env_logger;
 
 enum Command {
     Sub,
@@ -75,7 +72,6 @@ fn subscribe(
             "prefix" => MatchingPolicy::Prefix,
             "wild" => MatchingPolicy::Wildcard,
             "strict" => MatchingPolicy::Strict,
-            "mqtt" => MatchingPolicy::Mqtt,
             _ => {
                 println!("Invalid matching type, should be 'prefix', 'wild' or 'strict'");
                 return;
@@ -102,7 +98,7 @@ fn subscribe(
             subscriptions.lock().unwrap().push(subscription);
             Ok(())
         })
-        .await()
+        .r#await()
         .unwrap();
 }
 
@@ -133,7 +129,7 @@ fn unsubscribe(
                     println!("Successfully unsubscribed from {}", topic);
                     Ok(())
                 })
-                .await()
+                .r#await()
                 .unwrap();
         }
         Err(_) => {
@@ -164,7 +160,7 @@ fn publish(client: &mut Client, args: &[String]) {
     client
         .publish_and_acknowledge(URI::new(uri), Some(args), None)
         .unwrap()
-        .await()
+        .r#await()
         .unwrap();
 }
 
@@ -204,23 +200,12 @@ fn event_loop(mut client: Client) {
             Command::Invalid(bad_command) => print!("Invalid command: {}", bad_command),
         }
     }
-    client.shutdown().unwrap().await().unwrap();
+    client.shutdown().unwrap().r#await().unwrap();
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    println!("{:?}", args);
-    let mut url: String = "ws://127.0.0.1:9000/ws".to_string();
-    if args.len() > 1 {
-        url = args[1].to_string();
-    }
-    let mut realm: String = "test.it".to_string();
-    if args.len() > 2 {
-        realm = args[2].to_string();
-    }
-
     env_logger::init();
-    let connection = Connection::new(url.as_str(), realm.as_str());
+    let connection = Connection::new("ws://127.0.0.1:8090/ws", "wampire_realm");
     info!("Connecting");
     let client = connection.connect().unwrap();
 
