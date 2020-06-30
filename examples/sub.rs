@@ -6,17 +6,18 @@ extern crate serde;
 extern crate serde_json;
 extern crate wampire;
 
-use std::{env, io};
-use std::env::args;
+use std::env;
 use std::sync::{Arc, Mutex};
 
 use eventual::Async;
-use serde::Serialize;
-use serde_json::Serializer;
+
+
 
 use wampire::{MatchingPolicy, URI, Value};
 use wampire::client::{Client, Connection, Subscription};
 
+use std::thread;
+use std::time::Duration;
 
 fn subscribe(
     client: &mut Client,
@@ -27,7 +28,7 @@ fn subscribe(
     let subscriptions = Arc::clone(subscriptions);
     client.subscribe_with_pattern(
             URI::new(&topic),
-            Box::new(move |args, kwargs| {
+            Box::new(move |args, _kwargs| {
 //                println!(
 //                    "{} => ( {:?} )-( {:?} )",
 //                    topic, args, kwargs
@@ -48,7 +49,7 @@ fn subscribe(
             subscriptions.lock().unwrap().push(subscription);
             Ok(())
         })
-        .await()
+        .r#await()
         .unwrap();
 }
 
@@ -72,5 +73,8 @@ fn main() {
 
     let mut subscriptions = Arc::new(Mutex::new(Vec::new()));
     subscribe(&mut client, &mut subscriptions, "#".to_string(), MatchingPolicy::Mqtt);
-    loop {}
+    loop {
+        thread::sleep(Duration::from_secs(60));
+        // println!("tick ...")
+    }
 }

@@ -163,7 +163,7 @@ impl ConnectionHandler {
     }
 
     fn on_message_error(&mut self, error: Error) -> WSResult<()> {
-        use std::error::Error as StdError;
+        // use std::error::Error as StdError;
         match error.get_kind() {
             ErrorKind::WSError(e) => Err(e),
             ErrorKind::URLError(_) => unimplemented!(),
@@ -186,7 +186,7 @@ impl ConnectionHandler {
                 self.terminate_connection()
             }
             ErrorKind::MsgPackError(e) => {
-                error!("Could not parse MsgPack: {}", e.description());
+                error!("Could not parse MsgPack: {}", e.to_string());
                 self.terminate_connection()
             }
             ErrorKind::MalformedData => unimplemented!(),
